@@ -11,6 +11,7 @@ public class UserRegistration {
     static String authToken;
     static String baseURL = "https://www.ndosiautomation.co.za";
     static String UserID;
+    static String registerEmail = Faker.instance().internet().emailAddress(); // Generate a random email address using Java Faker
 
     @Test
     public void adminLoginTest() {
@@ -43,23 +44,22 @@ public class UserRegistration {
     public void userRegistrationTest() {
 
         String apiPath = "/APIDEV/register";
-        String randomEmail = Faker.instance().internet().emailAddress(); // Generate a random email address using Java Faker
         String payLoad = String.format(""" 
-                  {"firstName": "Dayne",
-                  "lastName": "Assignment",
-                  "email": "%s",
-                  "password": "Assignment@26",
-                  "confirmPassword": "Assignment@26",
-                  "groupId": "1deae17a-c67a-4bb0-bdeb-df0fc9e2e526"
-                  }
-                  """, randomEmail); // Generate a random email address using Java Faker and insert it into the payload
+                {"firstName": "Dayne",
+                "lastName": "Assignment",
+                "email": "%s",
+                "password": "Assignment@26",
+                "confirmPassword": "Assignment@26",
+                "groupId": "1deae17a-c67a-4bb0-bdeb-df0fc9e2e526"
+                }
+                """, registerEmail); // Generate a random email address using Java Faker and insert it into the payload
 
         // Send the POST request and capture the response
         Response response = RestAssured.given()
                 .baseUri(baseURL)
                 .basePath(apiPath)
                 .header("Content-Type", "application/json")
-                .header("Authorization", "Bearer" + authToken)
+                .header("Authorization", "Bearer " + authToken)
                 .body(payLoad)
                 .log().all()
                 .post().prettyPeek();
@@ -69,5 +69,93 @@ public class UserRegistration {
         Assert.assertEquals(actualStatusCode, 201, "Expected status code 201, but got " + actualStatusCode);
         System.out.println("User ID: " + UserID);
 
+    }
+
+    @Test(priority = 2)
+    public void userApprovalTest() {
+
+        String apiPath = "/APIDEV/admin/users/" + UserID + "/approve";
+
+
+        Response response = RestAssured.given()
+                .baseUri(baseURL)
+                .basePath(apiPath)
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + authToken)
+                .log().all()
+                .put().prettyPeek();
+
+        int actualStatusCode = response.getStatusCode();
+        Assert.assertEquals(actualStatusCode, 200, "Expected status code 200, but got " + actualStatusCode);
+    }
+
+    @Test(priority = 3)
+    public void makeUserAdminTest() {
+
+        String apiPath = "/APIDEV/admin/users/" + UserID + "/role";
+        String payLoad = """
+                {
+                  "role": "admin"
+                }
+                """;
+
+        Response response = RestAssured.given()
+                .baseUri(baseURL)
+                .basePath(apiPath)
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + authToken)
+                .body(payLoad)
+                .log().all()
+                .put().prettyPeek();
+
+        int actualStatusCode = response.getStatusCode();
+        Assert.assertEquals(actualStatusCode, 200, "Expected status code 200, but got " + actualStatusCode);
+    }
+
+    @Test(priority = 4)
+    public void loginWithNewAdminTest() {
+
+        String apiPath = "/APIDEV/login";
+        String payLoad = String.format("""
+                {
+                  "email": "%s",
+                  "password": "Assignment@26"
+                }
+                """, registerEmail); // Use the same random email address generated for registration
+
+        Response response = RestAssured.given()
+                .baseUri(baseURL)
+                .basePath(apiPath)
+                .header("Content-Type", "application/json")
+                .body(payLoad)
+                .log().all()
+                .post().prettyPeek();
+
+        int actualStatusCode = response.getStatusCode();
+        Assert.assertEquals(actualStatusCode, 200, "Expected status code 200, but got " + actualStatusCode);
+
+        // Extract role from response
+        String actualRole = response.jsonPath().getString("data.user.role");
+
+        // Assertion (THIS is your main verification)
+        Assert.assertEquals(actualRole, "admin");
+        System.out.println("New Admin Role: " + actualRole);
+    }
+
+    @Test(priority = 5)
+    public void deleteUserTest() {
+
+        String apiPath = "/APIDEV/admin/users/"+ UserID;
+
+        Response response = RestAssured.given()
+                .baseUri(baseURL)
+                .basePath(apiPath)
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + authToken)
+                .log().all()
+                .delete().prettyPeek();
+
+        int actualStatusCode = response.getStatusCode();
+        Assert.assertEquals(actualStatusCode, 200, "Expected status code 200, but got " + actualStatusCode);
     }
 }
