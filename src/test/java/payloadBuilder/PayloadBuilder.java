@@ -4,7 +4,7 @@ import org.json.simple.JSONObject;
 
 public class PayloadBuilder {
 
-    public static JSONObject adminLoginPayload(String email, String password) {
+    public static JSONObject loginPayload(String email, String password) {
 
         JSONObject loginUser = new JSONObject();
         loginUser.put("email", email);

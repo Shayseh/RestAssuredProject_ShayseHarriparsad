@@ -63,7 +63,6 @@ public class UserRegistration {
                 .baseUri(baseURL)
                 .basePath(apiPath)
                 .header("Content-Type", "application/json")
-                .header("Authorization", "Bearer " + authToken)
                 .body(payLoad)
                 .log().all()
                 .post().prettyPeek();
