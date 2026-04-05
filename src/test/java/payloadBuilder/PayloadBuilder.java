@@ -1,4 +1,5 @@
 package payloadBuilder;
+
 import org.json.simple.JSONObject;
 
 public class PayloadBuilder {
@@ -25,7 +26,21 @@ public class PayloadBuilder {
         return registerUser;
     }
 
+    public static JSONObject changeUserToAdminPayload(String role) {
 
+        JSONObject changeUserToAdmin = new JSONObject();
+        changeUserToAdmin.put("role", role);
+
+        return changeUserToAdmin;
+    }
+
+    public static JSONObject assignUserToGroupPayload(String groupID) {
+
+        JSONObject assignUserToGroup = new JSONObject();
+        assignUserToGroup.put("groupId", groupID);
+
+        return assignUserToGroup;
+    }
 
 
 }
