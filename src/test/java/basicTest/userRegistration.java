@@ -1,4 +1,4 @@
-package BasicTest;
+package basicTest;
 
 import com.github.javafaker.Faker;
 import io.restassured.RestAssured;
@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 import java.util.List;
 import java.util.Map;
 
-public class UserRegistration {
+public class userRegistration {
 
     static String authToken;
     static String baseURL = "https://www.ndosiautomation.co.za";
@@ -160,8 +160,10 @@ public class UserRegistration {
         int actualStatusCode = response.getStatusCode();
         Assert.assertEquals(actualStatusCode, 200, "Expected status code 200, but got " + actualStatusCode);
 
+        // Extract the list of groups from the response
         List<Map<String, Object>> groups = response.jsonPath().getList("data");
 
+        // Find the group with the name "Group T" and extract its ID
         groupID = groups.stream()
                 .filter(g -> g.get("Name").equals("Group T"))
                 .map(g -> g.get("Id").toString())
