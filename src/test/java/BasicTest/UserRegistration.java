@@ -6,12 +6,16 @@ import io.restassured.response.Response;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.List;
+import java.util.Map;
+
 public class UserRegistration {
 
     static String authToken;
     static String baseURL = "https://www.ndosiautomation.co.za";
     static String UserID;
     static String registerEmail = Faker.instance().internet().emailAddress(); // Generate a random email address using Java Faker
+    static String groupID;
 
     @Test
     public void adminLoginTest() {
@@ -113,7 +117,7 @@ public class UserRegistration {
     }
 
     @Test(priority = 4)
-    public void loginWithNewAdminTest() {
+    public void loginWithAdminStatusTest() {
 
         String apiPath = "/APIDEV/login";
         String payLoad = String.format("""
@@ -143,19 +147,97 @@ public class UserRegistration {
     }
 
     @Test(priority = 5)
-    public void deleteUserTest() {
+    public void getGroupsIDTest() {
 
-        String apiPath = "/APIDEV/admin/users/"+ UserID;
+        String apiPath = "/APIDEV/groups";
+
+        Response response = RestAssured.given()
+                .baseUri(baseURL)
+                .basePath(apiPath)
+                .log().all()
+                .get().prettyPeek();
+
+        int actualStatusCode = response.getStatusCode();
+        Assert.assertEquals(actualStatusCode, 200, "Expected status code 200, but got " + actualStatusCode);
+
+        List<Map<String, Object>> groups = response.jsonPath().getList("data");
+
+        groupID = groups.stream()
+                .filter(g -> g.get("Name").equals("Group T"))
+                .map(g -> g.get("Id").toString())
+                .findFirst()
+                .orElse(null);
+
+        Assert.assertNotNull(groupID, "Group T not found!");
+        System.out.println("Group ID: " + groupID);
+    }
+
+    @Test(priority = 6)
+    public void assignUserGroupAsAdminTest() {
+
+        String apiPath = "/APIDEV/admin/users/" + UserID + "/group";
+        String payLoad = String.format("""
+                {
+                  "groupId": "%s"
+                }
+                """, groupID);
 
         Response response = RestAssured.given()
                 .baseUri(baseURL)
                 .basePath(apiPath)
                 .header("Content-Type", "application/json")
                 .header("Authorization", "Bearer " + authToken)
+                .body(payLoad)
                 .log().all()
-                .delete().prettyPeek();
+                .put().prettyPeek();
 
         int actualStatusCode = response.getStatusCode();
         Assert.assertEquals(actualStatusCode, 200, "Expected status code 200, but got " + actualStatusCode);
+
+        String groupName = response.jsonPath().getString("data.groupName");
+        Assert.assertEquals(groupName, "Group T", "Expected group name 'Group T', but got " + groupName);
+        System.out.println("Assigned Group Name: " + groupName);
     }
-}
+
+    @Test(priority = 7)
+    public void loginToSeeGroupChangeTest() {
+
+        String apiPath = "/APIDEV/login";
+        String payLoad = String.format("""
+                {
+                  "email": "%s",
+                  "password": "Assignment@26"
+                }
+                """, registerEmail); // Use the same random email address generated for registration
+
+        Response response = RestAssured.given()
+                .baseUri(baseURL)
+                .basePath(apiPath)
+                .header("Content-Type", "application/json")
+                .body(payLoad)
+                .log().all()
+                .post().prettyPeek();
+
+        int actualStatusCode = response.getStatusCode();
+        Assert.assertEquals(actualStatusCode, 200, "Expected status code 200, but got " + actualStatusCode);
+        String actualGroupName = response.jsonPath().getString("data.user.groupName");
+        Assert.assertEquals(actualGroupName, "Group T", "Expected group name 'Group T', but got " + actualGroupName);
+        System.out.println("New Group Name: " + actualGroupName);
+    }
+        @Test(priority = 8)
+        public void deleteUserTest () {
+
+            String apiPath = "/APIDEV/admin/users/" + UserID;
+
+            Response response = RestAssured.given()
+                    .baseUri(baseURL)
+                    .basePath(apiPath)
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + authToken)
+                    .log().all()
+                    .delete().prettyPeek();
+
+            int actualStatusCode = response.getStatusCode();
+            Assert.assertEquals(actualStatusCode, 200, "Expected status code 200, but got " + actualStatusCode);
+        }
+    }
