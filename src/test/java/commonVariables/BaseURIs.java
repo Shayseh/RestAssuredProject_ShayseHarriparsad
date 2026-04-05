@@ -1,6 +1,6 @@
 package commonVariables;
 
-public class baseURIs {
+public class BaseURIs {
 
     public static String baseURL = "https://www.ndosiautomation.co.za";
 

@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 import java.util.List;
 import java.util.Map;
 
-public class userRegistration {
+public class UserRegistration {
 
     static String authToken;
     static String baseURL = "https://www.ndosiautomation.co.za";
@@ -79,7 +79,6 @@ public class userRegistration {
     public void userApprovalTest() {
 
         String apiPath = "/APIDEV/admin/users/" + UserID + "/approve";
-
 
         Response response = RestAssured.given()
                 .baseUri(baseURL)
