@@ -20,7 +20,7 @@ public class PayloadBuilder {
         registerUser.put("lastName", lastName);
         registerUser.put("email", email);
         registerUser.put("password", password);
-        registerUser.put("confrimPassword", password);
+        registerUser.put("confirmPassword", password);
         registerUser.put("groupId", groupID);
 
         return registerUser;

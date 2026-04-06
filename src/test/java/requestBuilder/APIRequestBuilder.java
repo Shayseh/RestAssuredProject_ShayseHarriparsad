@@ -16,7 +16,7 @@ public class APIRequestBuilder {
     static String UserID;
     static String groupID;
 
-    public static Response loginUserResponse(String email, String password) {
+    public static Response loginAdminResponse(String email, String password) {
 
         String apiPath = "/APIDEV/login";
         Response response = RestAssured.given()
@@ -24,12 +24,10 @@ public class APIRequestBuilder {
                 .basePath(apiPath)
                 .header("Content-Type", "application/json")
                 .body(loginPayload(email, password))
-                .log().all()
-                .post().prettyPeek();
-        int actualStatusCode = response.getStatusCode();
-        Assert.assertEquals(actualStatusCode, 200, "Expected status code 200, but got " + actualStatusCode);
+                .log().all() // Log the request details for debugging
+                .post()
+                .then().extract().response(); // Extract the response to access the token
         authToken = response.jsonPath().getString("data.token");
-
         System.out.println("Admin Auth token: " + authToken);
 
         return response;
@@ -45,74 +43,56 @@ public class APIRequestBuilder {
                 .header("Content-Type", "application/json")
                 .body(registerUserPayload(firstName, lastName, email, password, groupID))
                 .log().all()
-                .post().prettyPeek();
-
-        int actualStatusCode = response.getStatusCode();
+                .post()
+                .then().extract().response();
         UserID = response.jsonPath().getString("data.id");
-        Assert.assertEquals(actualStatusCode, 201, "Expected status code 201, but got " + actualStatusCode);
         System.out.println("User ID: " + UserID);
-
 
         return response;
     }
 
-    public static Response userApprovalResponse() {
+    public static Response userRegistrationApprovalResponse() {
 
         String apiPath = "/APIDEV/admin/users/" + UserID + "/approve";
-
-        Response response = RestAssured.given()
+        return RestAssured.given()
                 .baseUri(baseURL)
                 .basePath(apiPath)
                 .header("Content-Type", "application/json")
                 .header("Authorization", "Bearer " + authToken)
                 .log().all()
-                .put().prettyPeek();
-
-        int actualStatusCode = response.getStatusCode();
-        Assert.assertEquals(actualStatusCode, 200, "Expected status code 200, but got " + actualStatusCode);
-
-        return response;
+                .put()
+                .then().extract().response();
     }
 
     public static Response makeUserAdminResponse(String role) {
 
         String apiPath = "/APIDEV/admin/users/" + UserID + "/role";
 
-        Response response = RestAssured.given()
+        return RestAssured.given()
                 .baseUri(baseURL)
                 .basePath(apiPath)
                 .header("Content-Type", "application/json")
                 .header("Authorization", "Bearer " + authToken)
-                .body(loginPayload(role, role))
+                .body(changeUserToAdminPayload(role))
                 .log().all()
-                .put().prettyPeek();
-
-        int actualStatusCode = response.getStatusCode();
-        Assert.assertEquals(actualStatusCode, 200, "Expected status code 200, but got " + actualStatusCode);
-
-        return response;
+                .put()
+                .then().extract().response();
     }
 
-    public static Response loginWithAdminStatusResponse(String email, String password) {
+    public static Response userLoginResponse(String email, String password) {
 
         String apiPath = "/APIDEV/login";
-        Response response = RestAssured.given()
+        return RestAssured.given()
                 .baseUri(baseURL)
                 .basePath(apiPath)
                 .header("Content-Type", "application/json")
                 .body(loginPayload(email, password))
                 .log().all()
-                .post().prettyPeek();
-        int actualStatusCode = response.getStatusCode();
-        Assert.assertEquals(actualStatusCode, 200, "Expected status code 200, but got " + actualStatusCode);
-        authToken = response.jsonPath().getString("data.token");
-
-        System.out.println("Admin Auth token: " + authToken);
-
-        return response;
+                .post()
+                .then().extract().response();
     }
 
-    public static Response getGroupsResponse() {
+    public static Response getGroupsResponse(String groupName) {
 
         String apiPath = "/APIDEV/groups";
 
@@ -120,21 +100,18 @@ public class APIRequestBuilder {
                 .baseUri(baseURL)
                 .basePath(apiPath)
                 .log().all()
-                .get().prettyPeek();
+                .get()
+                .then().extract().response();
+        List<Map<String, Object>> groups = response.jsonPath().getList("data"); // Extract the list of groups from the response
 
-        int actualStatusCode = response.getStatusCode();
-        Assert.assertEquals(actualStatusCode, 200, "Expected status code 200, but got " + actualStatusCode);
-
-        List<Map<String, Object>> groups = response.jsonPath().getList("data");
-
-        groupID = groups.stream()
-                .filter(g -> g.get("Name").equals("Group T"))
-                .map(g -> g.get("Id").toString())
+        groupID = groups.stream()  // Stream the list of groups
+                .filter(g -> g.get("Name").equals(groupName)) // Filter groups to find the one with the specified name
+                .map(g -> g.get("Id").toString()) // Extract the ID of the matching group and convert it to a string
                 .findFirst()
                 .orElse(null);
 
-        Assert.assertNotNull(groupID, "Group T not found!");
-        System.out.println("Group ID: " + groupID);
+        Assert.assertNotNull(groupID, groupName + " not found!");
+        System.out.println("Group ID for " + groupName + ": " + groupID);
 
         return response;
     }
@@ -143,61 +120,29 @@ public class APIRequestBuilder {
 
         String apiPath = "/APIDEV/admin/users/" + UserID + "/group";
 
-        Response response = RestAssured.given()
+        return RestAssured.given()
                 .baseUri(baseURL)
                 .basePath(apiPath)
                 .header("Content-Type", "application/json")
                 .header("Authorization", "Bearer " + authToken)
                 .body(assignUserToGroupPayload(groupID))
                 .log().all()
-                .put().prettyPeek();
-
-        int actualStatusCode = response.getStatusCode();
-        Assert.assertEquals(actualStatusCode, 200, "Expected status code 200, but got " + actualStatusCode);
-
-        String groupName = response.jsonPath().getString("data.groupName");
-        Assert.assertEquals(groupName, "Group T", "Expected group name 'Group T', but got " + groupName);
-        System.out.println("Assigned Group Name: " + groupName);
-
-        return response;
-    }
-
-    public static Response loginToSeeGroupChangeResponse(String email, String password) {
-
-        String apiPath = "/APIDEV/login";
-        Response response = RestAssured.given()
-                .baseUri(baseURL)
-                .basePath(apiPath)
-                .header("Content-Type", "application/json")
-                .body(loginPayload(email, password))
-                .log().all()
-                .post().prettyPeek();
-
-        int actualStatusCode = response.getStatusCode();
-        Assert.assertEquals(actualStatusCode, 200, "Expected status code 200, but got " + actualStatusCode);
-        String actualGroupName = response.jsonPath().getString("data.user.groupName");
-        Assert.assertEquals(actualGroupName, "Group T", "Expected group name 'Group T', but got " + actualGroupName);
-        System.out.println("New Group Name: " + actualGroupName);
-
-        return response;
+                .put()
+                .then().extract().response();
     }
 
     public static Response deleteUserResponse() {
 
         String apiPath = "/APIDEV/admin/users/" + UserID;
 
-        Response response = RestAssured.given()
+        return RestAssured.given()
                 .baseUri(baseURL)
                 .basePath(apiPath)
                 .header("Content-Type", "application/json")
                 .header("Authorization", "Bearer " + authToken)
                 .log().all()
-                .delete().prettyPeek();
-
-        int actualStatusCode = response.getStatusCode();
-        Assert.assertEquals(actualStatusCode, 200, "Expected status code 200, but got " + actualStatusCode);
-
-        return response;
+                .delete()
+                .then().extract().response();
     }
 
 
