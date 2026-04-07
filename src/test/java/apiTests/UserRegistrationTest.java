@@ -6,12 +6,12 @@ import org.testng.annotations.Test;
 import requestBuilder.APIRequestBuilder;
 import utilities.DatabaseConnection;
 
-
 import java.sql.SQLException;
 
 import static org.hamcrest.Matchers.equalTo;
 import static utilities.DatabaseConnection.getEmail;
 import static utilities.DatabaseConnection.getPassword;
+
 
 public class UserRegistrationTest {
 

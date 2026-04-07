@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 public class UserRegistration {
-
     static String authToken;
     static String baseURL = "https://www.ndosiautomation.co.za";
     static String UserID;
@@ -30,6 +29,7 @@ public class UserRegistration {
         // Send the POST request and capture the response
         Response response = RestAssured.given()
                 .baseUri(baseURL)
+
                 .basePath(apiPath)
                 .header("Content-Type", "application/json")
                 .body(payLoad)
