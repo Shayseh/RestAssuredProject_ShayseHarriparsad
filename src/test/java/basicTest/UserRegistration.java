@@ -23,7 +23,7 @@ public class UserRegistration {
         String apiPath = "/APIDEV/login";
         String payLoad = """
                 {
-                  "email": "admin@gmail.com",
+                  "email": "SH@admin.com",
                   "password": "@12345678"
                 }""";
 

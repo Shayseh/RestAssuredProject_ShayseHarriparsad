@@ -1,11 +1,17 @@
 package apiTests;
 
 import com.github.javafaker.Faker;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import requestBuilder.APIRequestBuilder;
+import utilities.DatabaseConnection;
 
+
+import java.sql.SQLException;
 
 import static org.hamcrest.Matchers.equalTo;
+import static utilities.DatabaseConnection.getEmail;
+import static utilities.DatabaseConnection.getPassword;
 
 public class UserRegistrationTest {
 
@@ -13,9 +19,14 @@ public class UserRegistrationTest {
     static String registerPassword;
     static String registerGroupID;
 
+    @BeforeClass
+    public void setup() throws SQLException {
+        DatabaseConnection.connectToDatabase();
+    }
+
     @Test
     public void adminLoginTest() {
-        APIRequestBuilder.loginAdminResponse("admin@gmail.com", "@12345678")
+        APIRequestBuilder.loginAdminResponse(getEmail, getPassword)
                 .then()
                 .log().all()
                 .assertThat()
