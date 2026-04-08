@@ -3,7 +3,7 @@ package apiTests;
 import io.restassured.response.Response;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import payloadBuilder.Payload;
+import utilities.Payload;
 import utilities.Requests;
 
 import static commonVariables.BaseURIs.baseURL;
@@ -12,6 +12,7 @@ public class ApiImprovedTest {
     static String token;
     static String userIdCode;
     static String newGroupID;
+    static String userToken;
 
     Response response;
 
@@ -47,6 +48,16 @@ public class ApiImprovedTest {
     }
 
     @Test(priority = 3)
+    public void loginTest() {
+        String apiPath = "/APIDEV/login";
+        String payload = Payload.loginUserPayload(Payload.getRegisterEmail(), "Assignment@26");
+
+        response = Requests.post(baseURL + apiPath, payload);
+
+        Assert.assertEquals(response.getStatusCode(), 200, "Status code should be 200");
+    }
+
+    @Test(priority = 4)
     public void makeUserAdminTest() {
         String apiPath = "/APIDEV/admin/users/" + userIdCode + "/role";
         String adminRolePayload = Payload.changeUserToAdminPayload("admin");
@@ -63,6 +74,7 @@ public class ApiImprovedTest {
 
         response = Requests.post(baseURL + apiPath, payload);
 
+        userToken = response.jsonPath().getString("data.token");
         Assert.assertEquals(response.getStatusCode(), 200, "Status code should be 200");
         Assert.assertEquals(response.jsonPath().getString("data.user.role"), "admin", "User role should be admin");
     }
@@ -71,7 +83,7 @@ public class ApiImprovedTest {
     public void findGroupsTest() {
         String apiPath = "/APIDEV/groups";
 
-        response = Requests.get(baseURL + apiPath, token);
+        response = Requests.get(baseURL + apiPath, userToken);
 
         Assert.assertEquals(response.getStatusCode(), 200, "Status code should be 200");
         Assert.assertTrue(response.jsonPath().getBoolean("success"), "Response should indicate success");
@@ -84,7 +96,7 @@ public class ApiImprovedTest {
         String apiPath = "/APIDEV/admin/users/" + userIdCode + "/group";
         String payload = Payload.assignUserToGroupPayload(newGroupID);
 
-        response = Requests.put(baseURL + apiPath, payload, token);
+        response = Requests.put(baseURL + apiPath, payload, userToken);
 
         Assert.assertEquals(response.getStatusCode(), 200, "Status code should be 200");
     }

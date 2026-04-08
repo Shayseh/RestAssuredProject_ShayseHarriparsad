@@ -15,6 +15,7 @@ public class APIRequestBuilder {
     static String authToken;
     static String UserID;
     static String groupID;
+    static String newAuthToken;
 
     public static Response loginAdminResponse(String email, String password) {
 
@@ -66,9 +67,9 @@ public class APIRequestBuilder {
 
     public static Response makeUserAdminResponse(String role) {
 
-        String apiPath = "/APIDEV/admin/users/" + UserID + "/role";
+         String apiPath = "/APIDEV/admin/users/" + UserID + "/role";
 
-        return RestAssured.given()
+         return RestAssured.given()
                 .baseUri(baseURL)
                 .basePath(apiPath)
                 .header("Content-Type", "application/json")
@@ -79,10 +80,11 @@ public class APIRequestBuilder {
                 .then().extract().response();
     }
 
+
     public static Response userLoginResponse(String email, String password) {
 
         String apiPath = "/APIDEV/login";
-        return RestAssured.given()
+        Response response = RestAssured.given()
                 .baseUri(baseURL)
                 .basePath(apiPath)
                 .header("Content-Type", "application/json")
@@ -90,6 +92,10 @@ public class APIRequestBuilder {
                 .log().all()
                 .post()
                 .then().extract().response();
+        newAuthToken = response.jsonPath().getString("data.token");
+        System.out.println("Admin Auth token: " + newAuthToken);
+
+        return response;
     }
 
     public static Response getGroupsResponse(String groupName) {
@@ -124,7 +130,7 @@ public class APIRequestBuilder {
                 .baseUri(baseURL)
                 .basePath(apiPath)
                 .header("Content-Type", "application/json")
-                .header("Authorization", "Bearer " + authToken)
+                .header("Authorization", "Bearer " + newAuthToken)
                 .body(assignUserToGroupPayload(groupID))
                 .log().all()
                 .put()

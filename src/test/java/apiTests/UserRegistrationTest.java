@@ -58,17 +58,28 @@ public class UserRegistrationTest {
     }
 
     @Test(priority = 3)
-    public void makeUserAdminTest() {
-        APIRequestBuilder.makeUserAdminResponse("admin")
+    public void userLoginTest() {
+        APIRequestBuilder.userLoginResponse(registerEmail, registerPassword)
                 .then()
                 .log().all()
                 .assertThat()
                 .statusCode(200)
-                .body("success", equalTo(true));
+                .body("success", equalTo(true))
+                .body("data.user.role", equalTo("user"));
     }
 
     @Test(priority = 4)
-    public void userLoginTest() {
+    public void makeUserAdminTest() {
+        APIRequestBuilder.makeUserAdminResponse("admin")
+                .then()
+               .log().all()
+                .assertThat()
+               .statusCode(200)
+               .body("success", equalTo(true));
+    }
+
+    @Test(priority = 5)
+    public void userAdminLoginTest() {
         APIRequestBuilder.userLoginResponse(registerEmail, registerPassword)
                 .then()
                 .log().all()
@@ -78,7 +89,7 @@ public class UserRegistrationTest {
                 .body("data.user.role", equalTo("admin"));
     }
 
-    @Test(priority = 5)
+    @Test(priority = 6)
     public void getGroupsTest() {
         APIRequestBuilder.getGroupsResponse("Group T")
                 .then()
@@ -88,7 +99,7 @@ public class UserRegistrationTest {
                 .body("success", equalTo(true));
     }
 
-    @Test(priority = 6)
+    @Test(priority = 7)
     public void assignUserToGroupTest() {
         APIRequestBuilder.assignUserToGroupResponse()
                 .then()
@@ -99,7 +110,7 @@ public class UserRegistrationTest {
                 .body("data.groupName", equalTo("Group T"));
     }
 
-    @Test(priority = 7)
+    @Test(priority = 8)
     public void userLoginToSeeGroupChangeTest() {
         APIRequestBuilder.userLoginResponse(registerEmail, registerPassword)
                 .then()
@@ -110,7 +121,7 @@ public class UserRegistrationTest {
                 .body("data.user.groupName", equalTo("Group T"));
     }
 
-    @Test(priority = 8)
+    @Test(priority = 9)
     public void deleteUserTest() {
         APIRequestBuilder.deleteUserResponse()
                 .then()
