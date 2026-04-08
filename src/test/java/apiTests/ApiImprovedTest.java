@@ -6,12 +6,12 @@ import org.testng.annotations.Test;
 import payloadBuilder.Payload;
 import utilities.Requests;
 
-public class ApiImprovedTest {
+import static commonVariables.BaseURIs.baseURL;
 
-    static String baseURL = "https://www.ndosiautomation.co.za";
-    static String authToken;
-    static String userID;
-    static String groupID;
+public class ApiImprovedTest {
+    static String token;
+    static String userIdCode;
+    static String newGroupID;
 
     Response response;
 
@@ -23,7 +23,7 @@ public class ApiImprovedTest {
         response = Requests.post(baseURL + apiPath, payload);
 
         Assert.assertEquals(response.getStatusCode(), 200, "Status code should be 200");
-        authToken = response.jsonPath().getString("data.token");
+        token = response.jsonPath().getString("data.token");
     }
 
     @Test(priority = 1)
@@ -34,24 +34,24 @@ public class ApiImprovedTest {
         response = Requests.post(baseURL + apiPath, registerUserPayload);
 
         Assert.assertEquals(response.getStatusCode(), 201, "Status code should be 201");
-        userID = response.jsonPath().getString("data.id");
+        userIdCode = response.jsonPath().getString("data.id");
     }
 
     @Test(priority = 2)
     public void userApprovalTest() {
-        String apiPath = "/APIDEV/admin/users/" + userID + "/approve";
+        String apiPath = "/APIDEV/admin/users/" + userIdCode + "/approve";
 
-        response = Requests.put(baseURL + apiPath, "", authToken);
+        response = Requests.put(baseURL + apiPath, "", token);
 
         Assert.assertEquals(response.getStatusCode(), 200, "Status code should be 200");
     }
 
     @Test(priority = 3)
     public void makeUserAdminTest() {
-        String apiPath = "/APIDEV/admin/users/" + userID + "/role";
+        String apiPath = "/APIDEV/admin/users/" + userIdCode + "/role";
         String adminRolePayload = Payload.changeUserToAdminPayload("admin");
 
-        response = Requests.put(baseURL + apiPath, adminRolePayload, authToken);
+        response = Requests.put(baseURL + apiPath, adminRolePayload, token);
 
         Assert.assertEquals(response.getStatusCode(), 200, "Status code should be 200");
     }
@@ -62,6 +62,7 @@ public class ApiImprovedTest {
         String payload = Payload.loginUserPayload(Payload.getRegisterEmail(), "Assignment@26");
 
         response = Requests.post(baseURL + apiPath, payload);
+
         Assert.assertEquals(response.getStatusCode(), 200, "Status code should be 200");
         Assert.assertEquals(response.jsonPath().getString("data.user.role"), "admin", "User role should be admin");
     }
@@ -70,20 +71,20 @@ public class ApiImprovedTest {
     public void findGroupsTest() {
         String apiPath = "/APIDEV/groups";
 
-        response = Requests.get(baseURL + apiPath, authToken);
+        response = Requests.get(baseURL + apiPath, token);
 
         Assert.assertEquals(response.getStatusCode(), 200, "Status code should be 200");
         Assert.assertTrue(response.jsonPath().getBoolean("success"), "Response should indicate success");
-        String groupID = Payload.findGroupByName(response, "Group T");
-        Assert.assertNotNull(groupID, "Group T not found!");
+        newGroupID = Payload.findGroupByName(response, "Group T");
+        Assert.assertNotNull(newGroupID, "Group T not found!");
     }
 
     @Test(priority = 7)
     public void assignGroupTest() {
-        String apiPath = "/APIDEV/admin/users/" + userID + "/group";
-        String payload = Payload.assignUserToGroupPayload();
+        String apiPath = "/APIDEV/admin/users/" + userIdCode + "/group";
+        String payload = Payload.assignUserToGroupPayload(newGroupID);
 
-        response = Requests.put(baseURL + apiPath, payload, authToken);
+        response = Requests.put(baseURL + apiPath, payload, token);
 
         Assert.assertEquals(response.getStatusCode(), 200, "Status code should be 200");
     }
@@ -96,14 +97,14 @@ public class ApiImprovedTest {
         response = Requests.post(baseURL + apiPath, payload);
 
         Assert.assertEquals(response.getStatusCode(), 200, "Status code should be 200");
-        Assert.assertTrue(response.jsonPath().getList("data.user.groups").contains("Group T"), "User should be part of Group T");
+        Assert.assertTrue(response.jsonPath().getString("data.user.groupName").contains("Group T"), "User should be part of Group T");
     }
 
     @Test(priority = 9)
     public void deleteUserTest() {
-        String apiPath = "/APIDEV/admin/users/" + userID;
+        String apiPath = "/APIDEV/admin/users/" + userIdCode;
 
-        response = Requests.delete(baseURL + apiPath, authToken);
+        response = Requests.delete(baseURL + apiPath, token);
 
         Assert.assertEquals(response.getStatusCode(), 200, "Status code should be 200");
     }

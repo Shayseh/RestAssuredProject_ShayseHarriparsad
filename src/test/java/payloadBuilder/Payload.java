@@ -44,7 +44,7 @@ public class Payload {
         return String.format("""
                 {
                   "groupId": "%s"
-        """, groupID);
+        }""", groupID);
     }
 
     public static String findGroupByName(Response resp, String groupName) {
