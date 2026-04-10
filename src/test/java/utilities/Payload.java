@@ -52,8 +52,8 @@ public class Payload {
         List<Map<String, Object>> groups = resp.jsonPath().getList("data");
 
         return groups.stream()
-                .filter(group -> groupName.equals(group.get("Name"))) // Use equals for string comparison
-                .map(group -> group.get("Id").toString())// Convert the ID to String
+                .filter(group -> groupName.equals(group.get("Name")))  // Use equals for string comparison
+                .map(group -> group.get("Id").toString()) // Convert the ID to String
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Group not found: " + groupName));
 

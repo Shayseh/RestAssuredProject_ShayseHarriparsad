@@ -13,7 +13,7 @@ public class UserRegistration {
     static String authToken;
     static String baseURL = "https://www.ndosiautomation.co.za";
     static String UserID;
-    static String registerEmail = Faker.instance().internet().emailAddress(); // Generate a random email address using Java Faker
+    static String registerEmail;
     static String groupID;
 
     @Test
@@ -48,6 +48,7 @@ public class UserRegistration {
     public void userRegistrationTest() {
 
         String apiPath = "/APIDEV/register";
+        registerEmail = Faker.instance().internet().emailAddress();
         String payLoad = String.format(""" 
                 {"firstName": "Dayne",
                 "lastName": "Assignment",

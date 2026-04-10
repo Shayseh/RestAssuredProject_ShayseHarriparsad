@@ -1,6 +1,7 @@
 package apiTests;
 
 import com.github.javafaker.Faker;
+import io.qameta.allure.*;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import requestBuilder.APIRequestBuilder;
@@ -13,6 +14,8 @@ import static utilities.DatabaseConnection.getEmail;
 import static utilities.DatabaseConnection.getPassword;
 
 
+@Epic("User Management API")
+@Feature("User Registration Flow via Request Builder")
 public class UserRegistrationTest {
 
     static String registerEmail;
@@ -25,6 +28,9 @@ public class UserRegistrationTest {
     }
 
     @Test
+    @Severity(SeverityLevel.BLOCKER)
+    @Description("Login as admin using database credentials")
+    @Story("Admin Login")
     public void adminLoginTest() {
         APIRequestBuilder.loginAdminResponse(getEmail, getPassword)
                 .then()
@@ -35,6 +41,9 @@ public class UserRegistrationTest {
     }
 
     @Test(priority = 1)
+    @Severity(SeverityLevel.CRITICAL)
+    @Description("Register a new user with random email")
+    @Story("User Registration")
     public void userRegistrationTest() {
         registerEmail = Faker.instance().internet().emailAddress();
         registerPassword = "Assignment@26";
@@ -48,6 +57,9 @@ public class UserRegistrationTest {
     }
 
     @Test(priority = 2)
+    @Severity(SeverityLevel.CRITICAL)
+    @Description("Approve the registered user")
+    @Story("User Approval")
     public void userApprovalTest() {
         APIRequestBuilder.userRegistrationApprovalResponse()
                 .then()
@@ -58,6 +70,9 @@ public class UserRegistrationTest {
     }
 
     @Test(priority = 3)
+    @Severity(SeverityLevel.NORMAL)
+    @Description("Login with newly registered user and verify role")
+    @Story("User Login")
     public void userLoginTest() {
         APIRequestBuilder.userLoginResponse(registerEmail, registerPassword)
                 .then()
@@ -69,6 +84,9 @@ public class UserRegistrationTest {
     }
 
     @Test(priority = 4)
+    @Severity(SeverityLevel.CRITICAL)
+    @Description("Promote user to admin role")
+    @Story("Role Management")
     public void makeUserAdminTest() {
         APIRequestBuilder.makeUserAdminResponse("admin")
                 .then()
@@ -79,6 +97,9 @@ public class UserRegistrationTest {
     }
 
     @Test(priority = 5)
+    @Severity(SeverityLevel.CRITICAL)
+    @Description("Login as new admin and verify admin role")
+    @Story("Role Verification")
     public void userAdminLoginTest() {
         APIRequestBuilder.userLoginResponse(registerEmail, registerPassword)
                 .then()
@@ -90,6 +111,9 @@ public class UserRegistrationTest {
     }
 
     @Test(priority = 6)
+    @Severity(SeverityLevel.NORMAL)
+    @Description("Fetch groups and find 'Group T'")
+    @Story("Group Management")
     public void getGroupsTest() {
         APIRequestBuilder.getGroupsResponse("Group T")
                 .then()
@@ -100,6 +124,9 @@ public class UserRegistrationTest {
     }
 
     @Test(priority = 7)
+    @Severity(SeverityLevel.CRITICAL)
+    @Description("Assign user to 'Group T'")
+    @Story("Group Assignment")
     public void assignUserToGroupTest() {
         APIRequestBuilder.assignUserToGroupResponse()
                 .then()
@@ -111,6 +138,9 @@ public class UserRegistrationTest {
     }
 
     @Test(priority = 8)
+    @Severity(SeverityLevel.NORMAL)
+    @Description("Login and verify user is now in 'Group T'")
+    @Story("Group Verification")
     public void userLoginToSeeGroupChangeTest() {
         APIRequestBuilder.userLoginResponse(registerEmail, registerPassword)
                 .then()
@@ -122,6 +152,9 @@ public class UserRegistrationTest {
     }
 
     @Test(priority = 9)
+    @Severity(SeverityLevel.BLOCKER)
+    @Description("Delete the test user for cleanup")
+    @Story("User Cleanup")
     public void deleteUserTest() {
         APIRequestBuilder.deleteUserResponse()
                 .then()
