@@ -21,7 +21,7 @@ public class DatabaseConnection {
 
             // Code to execute a query and retrieve data from the database
             try (Statement statement = connection.createStatement();
-                 ResultSet resultSet = statement.executeQuery("SELECT * FROM loginUser WHERE id = 5")) {
+                 ResultSet resultSet = statement.executeQuery("SELECT * FROM loginUser WHERE id = 6")) {
 
                 while (resultSet.next()) {
                     getEmail = resultSet.getString("email");

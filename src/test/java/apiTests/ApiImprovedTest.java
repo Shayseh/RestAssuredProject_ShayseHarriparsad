@@ -26,7 +26,7 @@ public class ApiImprovedTest {
     @Story("Admin Login")
     public void test() {
         String apiPath = "/APIDEV/login";
-        String payload = Payload.loginUserPayload("SH@admin.com", "@12345678");
+        String payload = Payload.loginUserPayload("admin@gmail.com", "@12345678");
 
         response = Requests.post(baseURL + apiPath, payload);
 

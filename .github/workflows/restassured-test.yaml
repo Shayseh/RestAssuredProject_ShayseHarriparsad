@@ -1,0 +1,7 @@
+name: REST Assured API Tests
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
