@@ -12,14 +12,23 @@ public class DatabaseConnection {
     public static void connectToDatabase() throws SQLException {
         // Code to establish a connection to the database
 
-        String databaseURL = "jdbc:mysql://102.222.124.22:3306/ndosian6b8b7_teaching";
-        String databaseUser = "ndosian6b8b7_teaching";
-        String databasePassword = "^{SF0a=#~[~p)@l1";
+        String dbURL = System.getenv("DB_URL");
+        String dbUsername = System.getenv("DB_USERNAME");
+        String dbPassword = System.getenv("DB_PASSWORD");
 
-        // Establishing a connection to the database using try-with-resources to ensure proper resource management
-        try (Connection connection = DriverManager.getConnection(databaseURL, databaseUser, databasePassword)) {
+        // Fallback to default if not set (for local development)
+        if (dbURL == null) {
+            dbURL = "jdbc:mysql://102.222.124.22:3306/ndosian6b8b7_teaching";
+        }
+        if (dbUsername == null) {
+            dbUsername = "ndosian6b8b7_teaching";
+        }
+        if (dbPassword == null) {
+            dbPassword = "^{SF0a=#~[~p)@l1";
+        }
 
-            // Code to execute a query and retrieve data from the database
+        try (Connection connection = DriverManager.getConnection(dbURL, dbUsername, dbPassword)) {
+
             try (Statement statement = connection.createStatement();
                  ResultSet resultSet = statement.executeQuery("SELECT * FROM loginUser WHERE id = 6")) {
 
@@ -29,8 +38,9 @@ public class DatabaseConnection {
                     System.out.println("Email: " + getEmail + ", Password: " + getPassword);
                 }
             } catch (SQLException e) {
-                System.out.println("Database connection failed: " + e.getMessage());
+                System.out.println("Error executing query: " + e.getMessage());
             }
         }
+
     }
 }

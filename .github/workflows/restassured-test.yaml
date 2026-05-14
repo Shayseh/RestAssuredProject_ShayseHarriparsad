@@ -29,3 +29,11 @@ jobs:
 
       - name: Build project
         run: mvn clean install -DskipTests -q
+
+      - name: Run TestNG suites (testng.xml)
+        timeout-minutes: 15
+        run: mvn -U test -Dsurefire.suiteXmlFiles=testng.xml
+        env:
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
