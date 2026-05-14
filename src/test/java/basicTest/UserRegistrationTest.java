@@ -1,4 +1,4 @@
-package apiTests;
+package basicTest;
 
 import com.github.javafaker.Faker;
 import io.qameta.allure.*;
